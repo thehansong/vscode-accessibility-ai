@@ -1,0 +1,9 @@
+abc def ghi jkl mno pqr stu vwx xyz
+
+Here is another abc on line 2.
+
+And abc appears again on line 4.
+
+Some text without the pattern here.
+
+Final abc at the end.
