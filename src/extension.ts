@@ -1,7 +1,11 @@
 import * as vscode from 'vscode';
+import { OllamaPipeline } from './ollama-pipeline';
 
 // Decoration type - created once, reused for all decorations
 let decorationType: vscode.TextEditorDecorationType;
+
+// Ollama pipeline instance
+let ollamaPipeline: OllamaPipeline | undefined;
 
 // Debounce timer for document changes
 let debounceTimer: NodeJS.Timeout | undefined;
@@ -67,6 +71,89 @@ export function activate(context: vscode.ExtensionContext) {
     // Initial update for all visible editors
     console.log('[Highlighter] Running initial decoration pass...');
     updateAllVisibleEditors();
+
+    // Initialize Ollama pipeline
+    ollamaPipeline = new OllamaPipeline(context.extensionPath);
+
+    // Register Ollama analysis command
+    context.subscriptions.push(
+        vscode.commands.registerCommand('accessibilityHighlighter.analyzeWithOllama', async () => {
+            if (!ollamaPipeline) {
+                vscode.window.showErrorMessage('Ollama pipeline not initialized');
+                return;
+            }
+
+            // Create output channel for results
+            const outputChannel = vscode.window.createOutputChannel('Ollama Analysis');
+            outputChannel.show();
+
+            try {
+                // Test connection first
+                const provider = ollamaPipeline.getProvider();
+                const modelName = ollamaPipeline.getModelName();
+                outputChannel.appendLine(`Testing ${provider === 'azure' ? 'Azure OpenAI' : 'Ollama'} connection...`);
+                const isConnected = await ollamaPipeline.testConnection();
+
+                if (!isConnected) {
+                    const errorMsg = provider === 'azure'
+                        ? 'ERROR: Cannot connect to Azure OpenAI. Check your .env credentials.'
+                        : 'ERROR: Cannot connect to Ollama. Make sure Ollama is running (ollama serve)';
+                    outputChannel.appendLine(errorMsg);
+                    vscode.window.showErrorMessage(errorMsg);
+                    return;
+                }
+
+                const config = ollamaPipeline.getConfig();
+                outputChannel.appendLine(`Connected to ${provider === 'azure' ? 'Azure OpenAI' : 'Ollama'}`);
+                outputChannel.appendLine(`Using model: ${modelName}`);
+                outputChannel.appendLine(`Target file: ${config.targetFile}`);
+                outputChannel.appendLine('');
+                outputChannel.appendLine('Analyzing text...');
+                outputChannel.appendLine('='.repeat(50));
+
+                // Run analysis
+                const wordToSearch = 'dog';
+                const result = await ollamaPipeline.analyzeText(wordToSearch);
+
+                outputChannel.appendLine('');
+                outputChannel.appendLine('RAW FILE CONTENT:');
+                outputChannel.appendLine('-'.repeat(50));
+                outputChannel.appendLine(result.rawFileContent);
+                outputChannel.appendLine('');
+                outputChannel.appendLine('CONTEXT SUMMARY:');
+                outputChannel.appendLine('-'.repeat(50));
+                outputChannel.appendLine(result.contextSummary);
+                outputChannel.appendLine('');
+                outputChannel.appendLine(`WORD COUNT ("${wordToSearch}"):`);
+                outputChannel.appendLine('-'.repeat(50));
+                outputChannel.appendLine(result.wordCount);
+                outputChannel.appendLine('');
+                outputChannel.appendLine('='.repeat(50));
+
+                // Save analysis to file
+                const savedPath = ollamaPipeline.saveAnalysisToFile(result, wordToSearch);
+                outputChannel.appendLine(`Analysis saved to: ${savedPath}`);
+                outputChannel.appendLine('Analysis complete!');
+
+                vscode.window.showInformationMessage(`Analysis complete! Report saved to ${savedPath}`);
+
+            } catch (error) {
+                const errorMessage = error instanceof Error ? error.message : String(error);
+                outputChannel.appendLine(`ERROR: ${errorMessage}`);
+                vscode.window.showErrorMessage(`Ollama analysis failed: ${errorMessage}`);
+            }
+        })
+    );
+
+    // Register command to reload Ollama config
+    context.subscriptions.push(
+        vscode.commands.registerCommand('accessibilityHighlighter.reloadOllamaConfig', () => {
+            if (ollamaPipeline) {
+                ollamaPipeline.reloadConfig();
+                vscode.window.showInformationMessage('Ollama configuration reloaded');
+            }
+        })
+    );
 
     console.log('[Highlighter] Extension activated successfully');
 }

@@ -1,0 +1,27 @@
+==================================================
+TEXT ANALYSIS REPORT
+==================================================
+
+Generated: 26/01/2026, 14:59:08
+Provider: Azure OpenAI
+Deployment: gpt-4o-mini-oobee
+Source File: /Users/hans/Documents/GitHub/git-repo-test1/test-file.txt
+
+RAW FILE CONTENT:
+--------------------------------------------------
+While walking through the park at 2:00 p.m., a dog noticed another dog and immediately chased after it.
+
+
+CONTEXT SUMMARY:
+--------------------------------------------------
+The context of the text is a casual observation of animal behavior in a park setting. The narrative focuses on a dog that, while out for a walk, spots another dog and instinctively begins to chase it.
+
+Summary: A dog, during a walk in the park at 2:00 p.m., spots another dog and instinctively chases after it.
+
+WORD COUNT ("dog"):
+--------------------------------------------------
+The word 'dog' appears 2 times in the text. It is mentioned once when introducing the first dog and again when referring to the second dog that is being chased.
+
+==================================================
+END OF REPORT
+==================================================

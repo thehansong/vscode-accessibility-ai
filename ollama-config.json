@@ -1,0 +1,18 @@
+{
+  "provider": "azure",
+  "ollama": {
+    "baseUrl": "http://localhost:11434",
+    "model": "gpt-oss:20b",
+    "options": {
+      "temperature": 0.7,
+      "stream": false
+    }
+  },
+  "azure": {
+    "options": {
+      "temperature": 0.7,
+      "maxTokens": 4096
+    }
+  },
+  "targetFile": "/Users/hans/Documents/GitHub/git-repo-test1/test-file.txt"
+}

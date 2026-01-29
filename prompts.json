@@ -1,0 +1,4 @@
+{
+  "analyzeContext": "Identify the context and provide a brief summary of the following text:\n\n{{content}}",
+  "countWord": "Count how many times the word '{{word}}' appears in the following text. Return only the number and a brief explanation:\n\n{{content}}"
+}
